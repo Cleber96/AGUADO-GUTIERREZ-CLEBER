@@ -39,7 +39,7 @@ public class CalculadorTest {
         int numeroA = 10;
         int numeroB = 5;
         // Act
-        int resultado = calculador.resta(numeroA, numeroB);
+        int resultado = calculador.resta(numeroA, numeroB);resta
         // Assert
         assertEquals(5, resultado, "10 - 5 deberia ser 5");
     }
@@ -101,15 +101,15 @@ public class CalculadorTest {
         assertEquals(50, resultado, "10*5 deberia ser 50");
     }
     @Test
-    public void testMult_NegativeIzqNumbers_ShouldReturnCorrectMul() {
+    public void testMult_NegativeNumbers_ShouldReturnCorrectMul() {
         // Arrange
         Calculador calculador = new Calculador();
-        int numeroA = 10;
+        int numeroA = -10;
         int numeroB = 5;
         // Act
         int resultado = calculador.multiplicacion(numeroB, numeroA);
         // Assert
-        assertEquals(50, resultado, "15*10 deberia ser 50");
+        assertEquals(-50, resultado, "-10*5 deberia ser -50");
     }
     @Test
     public void testMult_NeutralIzqNumbers_ShouldReturnCorrectMult() {
@@ -145,6 +145,43 @@ public class CalculadorTest {
         if (numeroA.getClass().getSimpleName() == "int" || numeroB..getClass().getSimpleName() == "int") {
             assertEquals("invalid", resultado, "10.10 - 10.10 deberia ser invalid");
         }
+    }
+}
+//MULTIPLICACION
+    //VALIDOS
+    @Test
+    public void testDiv_PositiveNumbers_ShouldReturnCorrectDiv() {
+        // Arrange
+        Calculador calculador = new Calculador();
+        int numeroA = 10;
+        int numeroB = 5;
+        // Act
+        int resultado = calculador.division(numeroA, numeroB);
+        // Assert
+        assertEquals(2, resultado, "10/5 deberia ser 2");
+    }
+    @Test
+    public void testDiv_NegativeNumbers_ShouldReturnCorrectDiv() {
+        // Arrange
+        Calculador calculador = new Calculador();
+        int numeroA = -10;
+        int numeroB = 5;
+        // Act
+        int resultado = calculador.division(numeroA, numeroB);
+        // Assert
+        assertEquals(-2, resultado, "-10/5 deberia ser -2);
+    }
+//INVALIDOS
+    @Test
+    public void testDiv_NeutralNumbers_ShouldReturnCorrectDiv() {
+        // Arrange
+        Calculador calculador = new Calculador();
+        int numeroA = 10;
+        int numeroB = 0;
+        // Act
+        int resultado = calculador.division(numeroA, numeroB);
+        // Assert
+        assertEquals(invalid, resultado, "10/0 deberia ser invalid");
     }
 }
 ```
