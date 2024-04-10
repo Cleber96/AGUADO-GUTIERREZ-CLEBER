@@ -70,7 +70,7 @@ public class CalculadorTest {
         Calculador calculador = new Calculador();
         int numeroA = numeroB = 10;
         // Act
-        int resultado = calculador.resta(numeroA, numeroB);
+        int resultado = calculador.resta(numeroB, numeroA);
         // Assert
         assertEquals(0, resultado, "10 - 10 deberia ser 0");
     }
@@ -83,64 +83,66 @@ public class CalculadorTest {
         // Act
         int resultado = calculador.resta(numeroA, numeroB);
         // Assert
-        if (numeroA..getClass().getSimpleName() == "int" || numeroB..getClass().getSimpleName() == "int") {
+        if (numeroA.getClass().getSimpleName() == "int" || numeroB..getClass().getSimpleName() == "int") {
             assertEquals("invalid", resultado, "10.10 - 10.10 deberia ser invalid");
         }
     }
-//RESTA
+//MULTIPLICACION
     //VALIDOS
     @Test
-    public void testRes_PositiveNumbers_ShouldReturnCorrectRes() {
+    public void testMult_PositiveNumbers_ShouldReturnCorrectMult() {
         // Arrange
         Calculador calculador = new Calculador();
         int numeroA = 10;
         int numeroB = 5;
         // Act
-        int resultado = calculador.resta(numeroA, numeroB);
+        int resultado = calculador.multiplicacion(numeroA, numeroB);
         // Assert
-        assertEquals(5, resultado, "10 - 5 deberia ser 5");
+        assertEquals(50, resultado, "10*5 deberia ser 50");
     }
     @Test
-    public void testRes_NegativeNumbers_ShouldReturnCorrectRes() {
+    public void testMult_NegativeIzqNumbers_ShouldReturnCorrectMul() {
         // Arrange
         Calculador calculador = new Calculador();
         int numeroA = 10;
         int numeroB = 5;
         // Act
-        int resultado = calculador.resta(numeroA, numeroB);
+        int resultado = calculador.multiplicacion(numeroB, numeroA);
         // Assert
-        assertEquals(-5, resultado, "5 - 10 deberia ser -5");
+        assertEquals(50, resultado, "15*10 deberia ser 50");
     }
     @Test
-    public void testRes_NeutralIzqNumbers_ShouldReturnCorrectRes() {
+    public void testMult_NeutralIzqNumbers_ShouldReturnCorrectMult() {
         // Arrange
         Calculador calculador = new Calculador();
-        int numeroA = numeroB = 10;
+        int numeroA = 10;
+        int numeroB = 0;
         // Act
-        int resultado = calculador.resta(numeroA, numeroB);
+        int resultado = calculador.multiplicacion(numeroA, numeroB);
         // Assert
-        assertEquals(0, resultado, "10 - 10 deberia ser 0");
+        assertEquals(0, resultado, "10*0 deberia ser 0");
     }
     @Test
-    public void testRes_NeutralDerNumbers_ShouldReturnCorrectRes() {
+    public void testMult_NeutralDerNumbers_ShouldReturnCorrectMult() {
         // Arrange
         Calculador calculador = new Calculador();
-        int numeroA = numeroB = 10;
+        int numeroA = 10;
+        int numeroB = 0;
         // Act
-        int resultado = calculador.resta(numeroA, numeroB);
+        int resultado = calculador.multiplicacion(numeroB, numeroA);
         // Assert
-        assertEquals(0, resultado, "10 - 10 deberia ser 0");
+        assertEquals(0, resultado, "0*10 deberia ser 0");
     }
     //INVALIDOS
     @Test
-    public void testRes_FloatDifInterNumbers_ShouldReturnCorrectRes() {
+    public void testMult_FloatDifInterNumbers_ShouldReturnCorrectMult() {
         // Arrange
         Calculador calculador = new Calculador();
         float numeroA = numeroB = 10.10;
         // Act
-        int resultado = calculador.resta(numeroA, numeroB);
+        int resultado = calculador.multiplicacion(numeroA, numeroB);
         // Assert
-        if (numeroA..getClass().getSimpleName() == "int" || numeroB..getClass().getSimpleName() == "int") {
+        if (numeroA.getClass().getSimpleName() == "int" || numeroB..getClass().getSimpleName() == "int") {
             assertEquals("invalid", resultado, "10.10 - 10.10 deberia ser invalid");
         }
     }
