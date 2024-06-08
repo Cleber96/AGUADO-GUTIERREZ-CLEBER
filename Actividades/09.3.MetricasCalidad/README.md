@@ -311,7 +311,7 @@ public class LCOMCalculator {
 ```
 2. Ejecuta el programa y observar cómo cambian los valores de p y q y, por lo tanto, cómo afecta alvalor de LCOM. (se ejecutan 5 veces )
 - se ejecuta 5 veces para notar la diferencia
-- ![Ejecutar_LCOMCalculator](EjecutarLCOMCalculator.png)
+- ![EjecucionLCOMCalculator](EjecucionLCOMCalculator.png)
 - el valor del LCOM se ve afectado según los atributos que le correspondan a cada método, ya que depende de la variación de p-q = LCOM. Además, observamos que, como p+q en 2Cn, LCOM = 2Cn -2q, que quiere decir que, si un par de métodos pasa de tener unos atributos en común a no tenerlos, el LCOM variará en 2 unidades.
 ### EJERCICIO 2: Refactorizar LCOMCalculator para mejorar la legibilidad y eficiencia
 - Extraer la lógica del cálculo de LCOM a un método separado.
@@ -362,16 +362,296 @@ public class LCOMCalculator {
 }
 ```
 - Mejorar la estructura de ClassInfo para facilitar la adición de nuevos métodos atributos.
-# falta resolver SonarQube
+    - `Encapsulación y Abstracción`: la clase Metho busca encapsular la información de cada método (su nombre y sus atributos) en una sola entidad. más modular y fácil de entender
+    - `Coherencia y Claridad`: una clase Method separada ayuda a clarificar la estructura y el propósito del código.
+    - `Mantenibilidad y Escalabilidad`: Al encapsular la lógica relacionada con los métodos y sus atributos en una clase separada, facilitamos la adición de nuevos métodos y atributos en el futuro. Si queremos agregar funcionalidades específicas a cada método o si necesitamos realizar operaciones específicas en los atributos de cada método, podemos hacerlo fácilmente agregando métodos a la clase Method sin afectar la estructura general del código.
+    - `Flexibilidad y Extensibilidad`: implementamos getMethods y getAttributes busco flexibilidad y la extensibilidad del código gracias a su accedo a la información de manera controlada y segura, lo que facilita la integración con otras funcionalidades y componentes.
+
+```java
+    private static class Method {
+        private String name;
+        private Set<String> attributes;
+        public Method(String name, Set<String> attributes) {
+            this.name = name;
+            this.attributes = attributes;
+        }
+        public String getName() {
+            return name;
+        }
+        public Set<String> getAttributes() {
+            return attributes;
+        }
+    }
+    private static class ClassInfo {
+        private List<Method> methods = new ArrayList<>();
+        private Set<String> attributes = new HashSet<>();
+        public void addMethod(String methodName, Set<String> attrs) {
+            Method method = new Method(methodName, attrs);
+            methods.add(method);
+            attributes.addAll(attrs);
+        }
+        public List<Method> getMethods() {
+            return methods;
+        }
+        public Set<String> getAttributes() {
+            return attributes;
+        }
+    }
+```
 - Implementar manejo de errores y validaciones para la entrada de datos.
-# falta resolver
+    - el nombre no puede estar vacío
+    ```java
+    if (methodName == null || methodName.isEmpty()) {
+                throw new IllegalArgumentException("El nombre del método no puede estar vacío");
+            }
+    ```
+    - no se puede añadir dos métodos con el mismo nombre
+    ```java
+    if (methods.stream().anyMatch(method -> method.getName().equals(methodName))) {
+                throw new IllegalArgumentException("El método ya existe");
+            }
+    ```
+    - se consideró, pero no se le añade excepción de un método sin atributos porque es posible, pero sí se considera no ingresos de atributos nulos
+    ```java
+    if (attrs == null) {
+                throw new IllegalArgumentException("La lista de atributos no puede estar vacía o ser nula");
+            }
+    ```
+    - se capturan las excepxiones y se imprimem
+    ```java
+    try {
+            classInfo.addMethod("method1", new HashSet<>(Arrays.asList("attr1", "attr2")));
+            classInfo.addMethod("method2", new HashSet<>(Arrays.asList("attr2")));
+            classInfo.addMethod("method3", new HashSet<>(Arrays.asList("attr3")));
 
-Ejercicio 3: Implementar unidades de pruebas para LCOMCalculator
-Escribe pruebas unitarias para LCOMCalculator, especialmente para la lógica de cálculo de LCOM.
-Presenta un conjunto de pruebas unitarias que validen la correcta funcionalidad del calculador LCOM.
-•
-Usar JUnit para crear pruebas unitarias que verifiquen diferentes escenarios de cálculo de
-LCOM. Asegurate de que las pruebas cubran casos con alta cohesión, baja cohesión, y sin
-métodos.
+            calcLCOM(classInfo);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    ```
+- ejercicio finalizado
+```java
+import java.util.*;
 
-# falta resolver
+public class LCOMCalculator {
+    // Clase para representar la información de la clase
+    private static class ClassInfo {
+        private List<Method> methods = new ArrayList<>();
+        private Set<String> attributes = new HashSet<>();
+
+        public void addMethod(String methodName, Set<String> attrs) {
+            if (methodName == null || methodName.isEmpty()) {
+                throw new IllegalArgumentException("El nombre del método no puede estar vacío");
+            }
+            if (methods.stream().anyMatch(method -> method.getName().equals(methodName))) {
+                throw new IllegalArgumentException("El método ya existe");
+            }
+            Method method = new Method(methodName, attrs);
+            methods.add(method);
+            attributes.addAll(attrs);
+        }
+
+        public List<Method> getMethods() {
+            return methods;
+        }
+
+        public Set<String> getAttributes() {
+            return attributes;
+        }
+    }
+
+    private static class Method {
+        private String name;
+        private Set<String> attributes;
+
+        public Method(String name, Set<String> attributes) {
+            this.name = name;
+            this.attributes = attributes;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Set<String> getAttributes() {
+            return attributes;
+        }
+    }
+
+    public static void main(String[] args) {
+        ClassInfo classInfo = new ClassInfo();
+        // Simulación de entrada de métodos y sus accesos a atributos
+        try {
+            classInfo.addMethod("method1", new HashSet<>(Arrays.asList("attr1", "attr2")));
+            classInfo.addMethod("method2", new HashSet<>(Arrays.asList("attr2")));
+            classInfo.addMethod("method3", new HashSet<>(Arrays.asList("attr3")));
+
+            calcLCOM(classInfo);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void calcLCOM(ClassInfo classInfo) {
+        int p = 0, q = 0;
+        List<Method> methods = classInfo.getMethods();
+        for (int i = 0; i < methods.size(); i++) {
+            for (int j = i + 1; j < methods.size(); j++) {
+                Method method1 = methods.get(i);
+                Method method2 = methods.get(j);
+                Set<String> attrs1 = method1.getAttributes();
+                Set<String> attrs2 = method2.getAttributes();
+                // Calculamos si comparten atributos
+                Set<String> intersection = new HashSet<>(attrs1);
+                intersection.retainAll(attrs2);
+                if (intersection.isEmpty()) {
+                    p++; // No comparten atributos
+                } else {
+                    q++; // Comparten al menos un atributo
+                }
+            }
+        }
+        int lcom = p - q;
+        System.out.println("LCOM = " + lcom);
+    }
+}
+
+```
+
+### Ejercicio 3: Implementar unidades de pruebas para LCOMCalculator
+- con el programa ya finalizado se procederá a reestructurarlo para realizar las pruebas de manera satisfactoria 
+    - [LCOMCalculator.Method.java](LCOMCalculator/src/main/java/org/example/Method.java)
+    - [LCOMCalculator.ClassInfo.java](LCOMCalculator/src/main/java/org/example/ClassInfo.java)
+    - [LCOMCalculator.LCOM.java](LCOMCalculator/src/main/java/org/example/LCOM.java)
+- Escribe pruebas unitarias para LCOMCalculator, especialmente para la lógica de cálculo de LCOM.
+    - Method.java
+    ```java
+public class MethodTest {
+    @Test
+    public void testConstructorAndGetters() {
+        String name = "testMethod";
+        Set<String> attributes = new HashSet<>(Arrays.asList("attr1", "attr2"));
+        Method method = new Method(name, attributes);
+        assertEquals(name, method.getName(), "getName() debe devolver el nombre del método");
+        assertEquals(attributes, method.getAttributes(), "getAttributes() debe devolver el conjunto de atributos");
+    }
+    @Test
+    public void testConstructorWithNullName() {
+        try {
+            Set<String> attributes = new HashSet<>(Arrays.asList("attr1", "attr2"));
+            new Method(null, attributes);
+            fail("Se esperaba una excepción NullPointerException");
+        } catch (NullPointerException e) {
+            // La excepción esperada fue lanzada, la prueba pasa
+        }
+    }
+    @Test
+    public void testConstructorWithNullAttributes() {
+        try {
+            new Method("testMethod", null);
+            fail("Se esperaba una excepción NullPointerException");
+        } catch (NullPointerException e) {
+            // La excepción esperada fue lanzada, la prueba pasa
+        }
+    }
+    @Test
+    public void testConstructorWithEmptyAttributes() {
+        Set<String> attributes = new HashSet<>();
+        Method method = new Method("testMethod", attributes);
+        assertTrue(method.getAttributes().isEmpty(), "Los atributos deben ser una lista vacía");
+    }
+    @Test
+    public void testConstructorEmptyAttributes() {
+        Set<String> attributes = new HashSet<>();
+        Method method = new Method("testMethod", attributes);
+        assertTrue(method.getAttributes().isEmpty(), "Los atributos deben ser una lista vacía");
+    }
+}
+    ```
+    - ClassInfo.java
+    ```java
+public class ClassInfoTest {
+    private ClassInfo classInfo;
+    Set<String> attrs1;
+    Set<String> attrs2;
+    @BeforeEach
+    public void setUp() {
+        classInfo = new ClassInfo();
+        attrs1 = new HashSet<>(Arrays.asList("attr1", "attr2"));
+        attrs2 = new HashSet<>(Arrays.asList("attr3", "attr4"));
+    }
+    @Test
+    public void testAddMethod() {
+        assertEquals(0, classInfo.getMethods().size(), "No debe haber método agregado");
+        assertEquals(0, classInfo.getAttributes().size(), "No debe haber atributos agregados");
+
+        classInfo.addMethod("method1", attrs1);
+        assertEquals(1, classInfo.getMethods().size(), "Debe haber un método agregado");
+        assertEquals(2, classInfo.getAttributes().size(), "Debe haber dos atributos agregados");
+
+        classInfo.addMethod("method2", attrs2);
+        assertEquals(2, classInfo.getMethods().size(), "Debe haber dos métodos agregados");
+        assertEquals(4, classInfo.getAttributes().size(), "Debe haber cuatro atributos agregados");
+    }
+    @Test
+    public void testGetMethods() {
+        classInfo.addMethod("method1", attrs1);
+        classInfo.addMethod("method2", attrs2);
+
+        List<Method> methods = classInfo.getMethods();
+        assertEquals(2, methods.size(), "Debe haber dos métodos en la lista");
+        assertEquals("method1", methods.get(0).getName(), "El primer método debe tener nombre 'method1'");
+        assertEquals("method2", methods.get(1).getName(), "El segundo método debe tener nombre 'method2'");
+    }
+    @Test
+    public void testGetAttributes() {
+        classInfo.addMethod("method1", attrs1);
+        classInfo.addMethod("method2", attrs2);
+
+        Set<String> attributes = classInfo.getAttributes();
+        assertEquals(4, attributes.size(), "Debe haber cuatro atributos en el conjunto");
+        assertTrue(attributes.contains("attr1"), "El conjunto debe contener 'attr1'");
+        assertTrue(attributes.contains("attr2"), "El conjunto debe contener 'attr2'");
+        assertTrue(attributes.contains("attr3"), "El conjunto debe contener 'attr3'");
+        assertTrue(attributes.contains("attr4"), "El conjunto debe contener 'attr4'");
+    }
+}
+    ```
+    - LCOM.java
+    ```java
+public class LCOMTest {
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
+    ClassInfo classInfo;
+    LCOM lcom;
+    @BeforeEach
+    public void setUp() {
+        System.setOut(new PrintStream(outputStreamCaptor));
+        classInfo = new ClassInfo();
+        lcom = new LCOM();
+    }
+    @AfterEach
+    public void tearDown() {
+        System.setOut(originalOut);
+    }
+    @Test
+    public void testCalcLCOM_NoSharedAttributes() {
+        classInfo.addMethod("method1", new HashSet<>(Arrays.asList("attr1", "attr2")));
+        classInfo.addMethod("method2", new HashSet<>(Arrays.asList("attr3")));
+        lcom.calcLCOM(classInfo);
+        assertEquals("LCOM = 1\n", outputStreamCaptor.toString());
+    }
+    @Test
+    public void testCalcLCOM_SharedAttributes() {
+        classInfo.addMethod("method1", new HashSet<>(Arrays.asList("attr1", "attr2")));
+        classInfo.addMethod("method2", new HashSet<>(Arrays.asList("attr2", "attr3")));
+        lcom.calcLCOM(classInfo);
+        assertEquals("LCOM = -1\n", outputStreamCaptor.toString());
+    }
+    @Test
+    public void testCalcLCOM_EmptyClassInfo() {
+        lcom.calcLCOM(classInfo);
+        assertEquals("LCOM = 0\n", outputStreamCaptor.toString());
+    }
+}
+    ```
