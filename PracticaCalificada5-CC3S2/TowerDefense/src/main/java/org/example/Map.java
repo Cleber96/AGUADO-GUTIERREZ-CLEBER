@@ -8,7 +8,7 @@ public class Map {
     private final int EMPTY = 0;
     private final int PATH = 1;
     private final int BASE = 2;
-    private int[][] grid;
+    public int[][] grid;
     Random rand = new Random();
     public Map() {
         grid = new int[DIMENSION][DIMENSION];
@@ -53,7 +53,7 @@ public class Map {
         }
     }
 
-    private String getSymbol(int cellType) {
+    public String getSymbol(int cellType) {
         switch (cellType) {
             case EMPTY:
                 return "[ ]";

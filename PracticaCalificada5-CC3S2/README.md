@@ -185,26 +185,181 @@ mounts. Explica las diferencias entre ellos y las mejores prácticas para su uso
 | **Bind mounts**            | Un mapeo directo de un directorio o archivo específico en el host dentro del contenedor. Los datos existen fuera del ciclo de vida del contenedor.            | - Los bind mounts dependen de la estructura del sistema de archivos del host.<br>- Pueden afectar el sistema de archivos del host. | - Usar para necesidades específicas de acceso a archivos del sistema o para configuraciones específicas del entorno de desarrollo.   |
 
 #### PRÁCTICA
+1.  Crea una red personalizada para el proyecto Tower Defense y configura los contenedores
+  - crear red con `docker network create game-network`
+  - definir contenedores con 
+  ```bash
+  version: '3'
+  services:
+    database:
+      image: postgres:12
+    game:
+      image: app:tag
+      networks:
+        - game-network
 
+      volumes:
+        - game-data:/app/data
+  networks:
+    game-network:
+      driver: bridge
 
-```bash
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: tower-defense-deployment
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: tower-defense-game
-  template:
-    metadata:
-      labels:
+  ```
+  - muestra resultados
+  ![redPersonal_contenedor](Image/redPersonal_contenedor.png)
+  - construir y corre contenedores
+  ![construir_correr_contenedores](Image/construir_correr_contenedores.png)
+
+2. Implementa un volumen Docker para almacenar los datos del juego de forma persistente. Asegúrate de que el volumen se monte correctamente y que los datos persistan después de reiniciar el contenedor.
+  - añado una sección `volumes` para definir un volumen en la raíz del archivo docker-compose.yml y además se almacena en postgrest
+  ```bash
+  version: '3'
+  services:
+    database:
+      image: postgres:12
+    game:
+      image: app:tag
+      networks:
+        - game-network
+
+      volumes:
+        - game-data:/app/data
+  networks:
+    game-network:
+      driver: bridge
+  volumes:
+    game-data:
+      driver: local
+
+  ```
+  - persistencia
+  ```bash
+  docker-compose up -d
+  docker-compose stop database
+  docker-compose start database
+  ```
+  ![persistencia](Image/persistencia.png)
+3. Utiliza docker-compose para definir los servicios de la aplicación Tower Defense, incluyendo redes y volúmenes. Escribe un archivo docker-compose.yml que configure estos servicios y despliega la aplicación utilizando Docker Compose.
+  - ya se hicieron todas las cconfiguraciones en las secciones anteriores por lo que solo se demostrará la ejecución
+  ![despliege](Image/despliege.png)
+
+  ## EJERCICIO 03
+#### TEORÍA
+- Describe la arquitectura de Kubernetes y sus componentes principales, incluyendo el API server, etcd, scheduler, y kubelet. Explica cómo estos componentes interactúan para
+gestionar un clúster de Kubernetes.
+ - Discute las estrategias de escalabilidad y alta disponibilidad en Kubernetes. Explica cómo Kubernetes maneja la recuperación de fallos y la gestión de réplicas.
+1. Arquitectura de Kubernetes:
+  - API Server: Interfaz central para todas las operaciones del clúster.
+  - etcd: Almacena la configuración y el estado del clúster
+  - Scheduler: Decide en qué nodo se ejecutarán los pods según capacidades
+  - Kubelet: Ejecuta y supervisa los contenedores en cada nodo.
+2. Componentes Interactúan Así:
+  - API Server procesa solicitudes y comunica el estado a etcd.
+  - Scheduler observa nuevos pods a través del API Server y asigna nodos para su ejecución.
+  - Kubelet asegura que los pods asignados estén corriendo correctamente.
+3. Escalabilidad y Alta Disponibilidad:
+  - Horizontalmente (ajustando número de pods) y verticalmente (ajustando recursos por pod).
+  - Alta disponibilidad a través de replicas de componentes clave y reasignación de pods en fallo de nodos.
+4. Recuperación de Fallos y Gestión de Réplicas:
+  - Pods: ReplicaSet crea o elimina pods según la configuración deseada.
+  - Nodos: En fallo de nodos, los pods se reprograman automáticamente en otros nodos.
+  - Datos: StatefulSets manejan aplicaciones con estado que requieren persistencia.
+#### PRÁCTICA
+1. Escribe un archivo deployment.yaml para la aplicación Tower Defense. Asegúrate de definir los recursos necesarios (CPU, memoria) y las políticas de escalabilidad. `desployment.yaml`
+```ỳaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: tower-defense-deployment
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
         app: tower-defense-game
-    spec:
-      containers:
-        - name: tower-defense-game
-          image: Game
-          ports:
-            - containerPort: 8080
+    template:
+      metadata:
+        labels:
+          app: tower-defense-game
+      spec:
+        containers:
+          - name: tower-defense-game
+            image: game-image:latest
+            ports:
+              - containerPort: 8080
+            resources:
+              requests:
+                cpu: "500m"
+                memory: "256Mi"
+              limits:
+                cpu: "1"
+                memory: "512Mi"
+  ---
+  apiVersion: autoscaling/v1
+  kind: HorizontalPodAutoscaler
+  metadata:
+    name: tower-defense-hpa
+  spec:
+    scaleTargetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: tower-defense-deployment
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+
 ```
+2.Implementa un Service en Kubernetes para exponer la aplicación Tower Defense a través de una IP pública. Utiliza un LoadBalancer para distribuir el tráfico entre múltiples réplicas de la aplicación. `Service.yaml`
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: tower-defense-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: tower-defense-game
+
+```
+- comandos que se utilizaron 
+```bash
+  minikube start
+  minikube status
+  kubectl config view
+  // desploy
+  kubectl apply -f deployment.yaml
+  // verificar desploy
+  kubectl get deployments
+  kubectl get pods
+  //desplegar servicio
+  kubectl apply -f service.yaml
+  //verificar 
+  kubectl get services
+  //acceder a aplicación
+  kubectl get service tower-defense-service
+```
+![desployment_service](Image/desployment_service.png)
+
+## EJERCICIO 04
+#### PRÁCTICA
+1. Escribe pruebas unitarias para la clase TowerDefenseGame utilizando Mockito para simular las dependencias de Map, Player y Wave.
+![GameTestCod](Image/GameTestCod.png)
+  - ejecución Game
+  ![GameStart](Image/GameStart.png)
+  - resultado Test
+  ![GameTest](Image/GameTest.png)
+
+2. Implementa pruebas de integración que verifiquen la interacción entre las clases principales (TowerDefenseGame, Map, Player, Wave). Utiliza Mockito para controlar y verificar el comportamiento de las dependencias en estas pruebas.
+
+  - codigo TEst
+  ![GameIntegration](Image/GameIntegration.png)
+  - resultado Test
+  ![GameTestIntegration](Image/GameTestIntegration.png)
+
+3. Configura un pipeline de integración continua (CI) que ejecute automáticamente las pruebas
+unitarias e informe sobre los resultados. Utiliza herramientas como Jenkins o GitHub Actions
+para implementar este pipeline (opcional).
