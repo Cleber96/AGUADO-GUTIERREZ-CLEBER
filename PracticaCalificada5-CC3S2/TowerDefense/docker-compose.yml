@@ -1,0 +1,14 @@
+version: '3'
+services:
+  game:
+    image: app:tag
+    networks:
+      - game-network
+    volumes:
+      - game-data:/app/data
+networks:
+  game-network:
+    driver: bridge
+volumes:
+  game-data:
+    driver: local
