@@ -1,8 +1,6 @@
 package org.example;
 
 public class Clima {
-    private int humedad;            //porcentaje
-    private int presionAtm;         //hPa
 
     public void alertas() {
         //lluvis intensa
