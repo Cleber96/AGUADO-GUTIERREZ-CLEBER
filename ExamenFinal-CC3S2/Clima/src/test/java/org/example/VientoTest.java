@@ -11,10 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class VientoTest {
     Viento viento;
+    Alerta alerta;
 
     @BeforeEach
     void setUp() {
-        viento = new Viento(0); // Inicializamos con 0 km/h para cada test
+        alerta = new AlertaPorUmbral();
+        viento = new Viento(0, alerta); // Inicializamos con 0 km/h para cada test
     }
 
     @AfterEach

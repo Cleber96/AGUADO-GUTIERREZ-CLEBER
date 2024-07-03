@@ -11,10 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TemperaturaTest {
     Temperatura temperatura;
+    Alerta alerta;
 
     @BeforeEach
     void setUp() {
-        temperatura = new Temperatura(0); // Inicializamos con 0 grados Celsius para cada test
+        alerta = new AlertaPorUmbral();
+        temperatura = new Temperatura(0, alerta); // Inicializamos con 0 grados Celsius para cada test
     }
 
     @AfterEach

@@ -346,7 +346,35 @@ public class PresionAtmosferica extends Sensor{
 - Explicación: los cambios que se realizaron permiten que los test sigan siendo aceptados con normalidad para que pasen, de lo contrario no reconocerían las anteriores funciones que fueron renombradas con el abstrac
 ## Validación de pruebas con stubs y fakes:
 ### 1. Crear stubs para simular las condiciones climáticas
-- EXPLICACIÓN: se crearán nuevas clases stub para cada clase que tenemos en la que al constructor se le añadirá un ingreso de la alerta que queremos simular
+#### se crea pruebas unitarias parametrizadas para los stubs
+- EXPLICACION: lo que se buscó con cada stub es que independientemente del valor ingresado, se pueda establecer un parametro booleano de salida controlado por nosotros.
+- solo se muestra el código test de uno, los demás se adjuntan en la imagen
+```java
+import static org.junit.jupiter.api.Assertions.*;
+class StubHumedadTest {
+    @ParameterizedTest
+    @CsvSource({
+            "65, true",
+            "65, false",
+            "55, true",
+            "55, false"
+    })
+    public void testVerificarAlerta(double valor, boolean alertaEsperada) {
+        StubHumedad stubHumedad = new StubHumedad(valor, alertaEsperada);
+        assertEquals(alertaEsperada, stubHumedad.verificarAlerta(), "La alerta debería ser " + alertaEsperada);
+    }
+}
+```
+![test_stubs](Image/test_stubs.png)
+- Los test en cada caso no pasan porque siguen igual que las clases originales
+![test_stubHumedad_no](Image/test_stubHumedad_no.png)
+![test_stubLLuvia_no](Image/test_stubLLuvia_no.png)
+![test_stubPresion_no](Image/test_stubPresion_no.png)
+![test_stubTemperatura_no](Image/test_stubTemperatura_no.png)
+![test_stubViento_no](Image/test_stubViento_no.png)
+- EXPLICACION: en cada caso se verifica pero para los casos que tiene sentido (cumpla menor que el umbral) resulte falso o viseversamente. Por lo que todavía no estaría controlada la simulación.
+#### se crean las clases stubs para que la preubas pasen
+- EXPLICACIÓN: se crearán nuevas clases stub para cada clase que tenemos en la que al constructor se le añadirá un ingreso de la alerta que queremos simular y así controlarlo 
 ```java
 public class StubHumedad extends Humedad {
     private boolean alerta;
@@ -363,7 +391,14 @@ public class StubHumedad extends Humedad {
 ![clases_stup](Image/clases_stup.png)
 - EXPLICACIÓN: en código solo se muestra la estructura para uno, pero en la imagen se verifica que fue creado uno para cada clase que teníamos estructurado
 - También se debe indicar que se utilizó `extens` pues solo vamos a usarlo para casos particulares que nosotros determinaremos, por lo que se aplica la herencia
-- se usará @Override para sobreescriber el método que vamos a simular de manera preestablecida y un ingreso adicional en el constructor con el valor simulado.
+- se usará @Override para sobreescriber el método que vamos a simular de manera preestablecida y un ingreso adicional en el constructor con el valor simulado, además de forzar el atributo que deseamos.
+- Resultados
+![test_stubHumedad](Image/test_stubHumedad.png)
+![test_stubLLuvia](Image/test_stubLLuvia.png)
+![test_stubPresion](Image/test_stubPresion.png)
+![test_stubTemperatura](Image/test_stubTemperatura.png)
+![test_stubViento](Image/test_stubViento.png)
+- EXPLICACIÓN: como se observa, con las modificaciones que se explicaron anteriormente se puede simular cualquier resultado sin importar si tiene sentido con el contenido del valor ingresado
 #### refactoriza clases
 - Explicación: se observa que en cada clase se encuentra un método repetido que lo podemos incluir en el abstrac Sensor ya usado
 - Se borra el siguiente código de las clases
@@ -442,13 +477,255 @@ public class Viento extends Sensor {
 ![test_humedad_](Image/test_humedad_.png)
 ![test_presion_](Image/test_presion_.png)
 ### 2. Implementar fakes para simular escenarios de prueba más complejos
-- vamos a crear una clase FakeClima para gestionar múltiples sensores y simular diferentes condiciones climáticas
+#### Crear la clase fake para sensores:
+- ECPLICACION:
+ Las clases fake permitirán establecer valores específicos y controlar el resultado de la verificación de alertas.
+ ##### FAKE-HUMEDAD
+```java
+public class FakeHumedad extends Humedad {
+    private boolean alertaForzada;
+    public FakeHumedad(double valor, boolean alertaForzada) {
+        super(valor);
+        this.alertaForzada = alertaForzada;
+    }
+    @Override
+    public boolean verificarAlerta() {
+        return alertaForzada;
+    }
+    public void setAlertaForzada(boolean alertaForzada) {
+        this.alertaForzada = alertaForzada;
+    }
+}
+```
+ ##### FAKE-PRESION
+```java
+public class FakePresionAtmosferica extends PresionAtmosferica {
+    private boolean alertaForzada;
+    public FakePresionAtmosferica(double valor, boolean alertaForzada) {
+        super(valor);
+        this.alertaForzada = alertaForzada;
+    }
+    @Override
+    public boolean verificarAlerta() {
+        return alertaForzada;
+    }
+    public void setAlertaForzada(boolean alertaForzada) {
+        this.alertaForzada = alertaForzada;
+    }
+}
+```
+ ##### FAKE-TEMPERATURA
+```java
+public class FakeTemperatura extends Temperatura {
+    private boolean alertaForzada;
+    public FakeTemperatura(double valor, boolean alertaForzada) {
+        super(valor);
+        this.alertaForzada = alertaForzada;
+    }
+    @Override
+    public boolean verificarAlerta() {
+        return alertaForzada;
+    }
+    public void setAlertaForzada(boolean alertaForzada) {
+        this.alertaForzada = alertaForzada;
+    }
+}
+```
+ ##### FAKE-LLUVIA
+```java
+public class FakeLLuvia extends LLuvia {
+    private boolean alertaForzada;
+    public FakeLLuvia(double valor, boolean alertaForzada) {
+        super(valor);
+        this.alertaForzada = alertaForzada;
+    }
+    @Override
+    public boolean verificarAlerta() {
+        return alertaForzada;
+    }
+    public void setAlertaForzada(boolean alertaForzada) {
+        this.alertaForzada = alertaForzada;
+    }
+}
+```
+ ##### FAKE-VIENTO
+```java
+public class FakeViento extends Viento {
+    private boolean alertaForzada;
+
+    public FakeViento(double valor, boolean alertaForzada) {
+        super(valor);
+        this.alertaForzada = alertaForzada;
+    }
+
+    @Override
+    public boolean verificarAlerta() {
+        return alertaForzada;
+    }
+
+    public void setAlertaForzada(boolean alertaForzada) {
+        this.alertaForzada = alertaForzada;
+    }
+}
+```
+#### Se muestra la pueba unitaria para el primer fake
+```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class FakeHumedadTest {
+    FakeHumedad fakeHumedad;
+    @BeforeEach
+    void setUp() {
+        fakeHumedad = new FakeHumedad(0, false); // Inicializamos con 0 porcentaje y sin alerta
+    }
+    @AfterEach
+    void tearDown() {
+        fakeHumedad = null; // Limpiar
+    }
+    @Test
+    void verificarAlertaForzada() {
+        fakeHumedad.setAlertaForzada(true); // Forzamos una alerta
+        assertTrue(fakeHumedad.verificarAlerta(), "Debería retornar true debido a la alerta forzada");
+
+        fakeHumedad.setAlertaForzada(false); // Quitamos la alerta forzada
+        assertFalse(fakeHumedad.verificarAlerta(), "Debería retornar false debido a la alerta forzada");
+    }
+}
+
+```
+##### EXPLICACION
+- Como se muestra en los código se fuerzan las alertas para poder simular el escenario que se desea sin restricciones haciendo principalmente this.alertaForzada = alertaForzada, además de sus otras modificaciones en métodos sobreescritos, se realizan pruebas unitarias parametrizadas para los métodos fake
+![test_fakeHumedad](Image/test_fakeHumedad.png)
+![test_fakeTemperatura](Image/test_fakeTemperatura.png)
+![test_fakePresion](Image/test_fakePresion.png)
+![test_fakeViento](Image/test_fakeViento.png)
+![test_fakeLLuvia](Image/test_fakeLLuvia.png)
 ## Refactorización y código limpio:
 ### 1. Refactorizar el código regularmente para mejorar la legibilidad y mantenibilidad.
-#### 2. Aplicar principios de diseño limpio y patrones de diseño adecuados.
+- EXPLICACION: En el caso particular de la refactorización, se tiene que ya no se encuentra más casos de los que tenga conocimiento para poder mejorar el código, debido a que `durante todo el proceso se ha refactorizado`, por lo que esta sección solo se mostrará el código que hasta ahora tenemos ya refactorizado
+![clases_refactor](Image/clases_refactor.png)
+### 2. Aplicar principios de diseño limpio y patrones de diseño adecuados.
+#### Primero, definimos una interfaz para el comportamiento de alerta:
+```java
+public interface Alerta {
+    boolean verificar(double valor, double umbral);
+}
+```
+- Explicacion: esta sepación
+#### Implementamos una clase concreta de Alerta:
+```java
+public class AlertaPorUmbral implements Alerta {
+    @Override
+    public boolean verificar(double valor, double umbral) {
+        return valor > umbral;
+    }
+}
+```
+#### Actualizamos la clase Sensor para utilizar la interfaz Alerta:
+```java
+package org.example;
+
+public abstract class Sensor {
+    protected double valor;
+    private double umbral;
+    private String mensajeAlerta;
+    private String auxiliar;
+    private Alerta alerta;
+
+    public Sensor(double valor, double umbral, String mensajeAlerta, String auxiliar, Alerta alerta) {
+        this.valor = valor;
+        this.umbral = umbral;
+        this.mensajeAlerta = mensajeAlerta;
+        this.auxiliar = auxiliar;
+        this.alerta = alerta;
+    }
+
+    public boolean verificarAlerta() {
+        return alerta.verificar(valor, umbral);
+    }
+
+    public String getAuxiliar() {
+        return auxiliar;
+    }
+
+    public String getMensajeAlerta() {
+        return mensajeAlerta;
+    }
+
+    public double getValor() {
+        return valor;
+    }
+
+    public void setValor(double valor) {
+        this.valor = valor;
+    }
+}
+```
+- EXPLICACION: se añade el atributo alerta para que tenga toda la configuración necesaria para que pueda ser usado y cuente con extensionalidad 
+- a los códigos y test tambien se le añadiran el argumento necesario en el constructor para que sigan manteniendo la lógica. todos las clases son parecidad, así que solo se mostrará un ejemplo de la clase y su test
+```java
+public class Humedad extends Sensor {
+    private static final double UMBRAL_HUMEDAD_ALTA = 60; // Celsius
+
+    public Humedad(double valor, Alerta alerta) {
+        super(valor, UMBRAL_HUMEDAD_ALTA, "Humedad Alta","Activar calefacción", alerta);
+    }
+}
+class HumedadTest {
+    Humedad humedad;
+    Alerta alerta;
+
+    @BeforeEach
+    void setUp() {
+        alerta = new AlertaPorUmbral();
+        humedad = new Humedad(0, alerta); // Inicializamos con 0 porcentaje
+    }
+    //demás código se mantiene igual c_
+}
+```
+- Se comprueba que los test sigan pasando para evitar errores 
+![test_presion_](Image/test_presion_.png)
+![test_temperatura_sensor](Image/test_temperatura_sensor.png)
+![test_lluvia_sensor](Image/test_lluvia_sensor.png)
+![test_humedad_](Image/test_humedad_.png)
+![test_viento_sensor](Image/test_viento_sensor.png)
+- EXPLICACION: Como todos las pruebas están en verde podemos continuar con el proyecto
 ## Métricas de calidad:
 ### 1. Utilizar herramientas para medir la cobertura de pruebas (Jacoco)
 ### 2. Evaluar la complejidad del código utilizando métricas como la complejidad ciclomática.
 
 # SPRINT 2
-
+## Contenerización del Sistema:
+### Crear un Dockerfile para construir la imagen de la aplicación.
+- EXPLICACION: se procederá a escribir el Dockerfile explicandole porqué se utiliza cada comando
+```sh
+  # Uso OpenJDK 17 instalada en mi ordenador
+  FROM openjdk:17
+  # Establezco el directorio de trabajo
+  WORKDIR /app
+  # Copio todo el contenido 
+  COPY . .
+  # Compilar todos los archivos Java
+  RUN javac src/main/java/org/example/*.java
+  # Comandos de inicio para ubicar archivo principal y ejecutarlo
+  CMD ["java", "-cp", "src/main/java", "org.example.Clima"]
+  ```
+  ![docker_buildClima](Image/docker_buildClima.png)
+- EXPLICACION: Se busca encapsular el programa en un contenedor por lo que el comando build nos ayuda a crear una imagen y con -t nombrarlo
+  ![docker_runClima](Image/docker_runClima.png)
+- EXPLICACION: Se busca entradas interacctivas, por lo que se tiene que incluir en el comando run --rm -it para correr, borrar cuando termine y -it que sea interactivo para que se pueda ingresar datos
+### Configurar un docker-compose.yml si se necesitan múltiples servicios (bases de datos, servicios de simulación de clima).
+## Refinamiento del TDD:
+### Escribir nuevas pruebas para cualquier funcionalidad adicional.
+### Asegurar que todas las pruebas existentes pasen en el entorno Dockerizado.
+## Mejora de la estrategia de pruebas:
+### Integrar las pruebas unitarias y de integración en el pipeline de Docker.
+### Asegurar que los stubs y fakes funcionen correctamente en el entorno contenerizado.
+## Refactorización y código limpio:
+### Continuar refactorizando el código para mejorar la calidad y mantener la adherencia a los principios de diseño limpio.
+## Métricas de Calidad:
+### Monitorear la cobertura de pruebas y la complejidad del código en el entorno Dockerizado.
+### Utilizar herramientas de análisis de código para asegurar la calidad.

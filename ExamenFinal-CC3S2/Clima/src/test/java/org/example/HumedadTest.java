@@ -8,10 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HumedadTest {
     Humedad humedad;
+    Alerta alerta;
 
     @BeforeEach
     void setUp() {
-        humedad = new Humedad(0); // Inicializamos con 0 porcentaje
+        alerta = new AlertaPorUmbral();
+        humedad = new Humedad(0, alerta); // Inicializamos con 0 porcentaje
     }
 
     @AfterEach

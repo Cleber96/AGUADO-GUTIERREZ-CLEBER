@@ -11,10 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LLuviaTest {
     LLuvia lluvia;
+    Alerta alerta;
 
     @BeforeEach
     void setUp() {
-        lluvia = new LLuvia(0); // Inicializamos con 0 mm de lluvia para cada test
+        alerta = new AlertaPorUmbral();
+        lluvia = new LLuvia(0, alerta); // Inicializamos con 0 mm de lluvia para cada test
     }
 
     @AfterEach
