@@ -378,7 +378,175 @@ public class Main {
 ```
 ## Medición de cohesión y acoplamiento:
 ### Medir la cohesión utilizando la métrica Lack of Cohesion of Methods (LCOM).
-- muestrame 
+### Clase `Project`
+
+#### Atributos
+- `name`
+- `description`
+- `startDate`
+- `endDate`
+
+#### Métodos
+- `getName`
+- `setName`
+- `getDescription`
+- `setDescription`
+- `getStartDate`
+- `setStartDate`
+- `getEndDate`
+- `setEndDate`
+
+#### LCOM
+- Métodos que comparten atributos:
+  - `getName` y `setName` (comparten `name`)
+  - `getDescription` y `setDescription` (comparten `description`)
+  - `getStartDate` y `setStartDate` (comparten `startDate`)
+  - `getEndDate` y `setEndDate` (comparten `endDate`)
+- Métodos que no comparten atributos: 
+  - `getName` y `getDescription`
+  - `getName` y `getStartDate`
+  - `getName` y `getEndDate`
+  - `setName` y `setDescription`
+  - `setName` y `setStartDate`
+  - `setName` y `setEndDate`
+  - Total de pares posibles: \( \frac{8(8-1)}{2} = 28 \)
+
+Pares que comparten atributos: 4  
+Pares que no comparten atributos: \( 28 - 4 = 24 \)  
+
+- **LCOM = 24 - 4 = 20**
+
+### Clase `Task`
+
+#### Atributos
+- `title`
+- `description`
+- `assignedTo`
+- `status`
+- `dueDate`
+- `assignmentStrategy`
+
+#### Métodos
+- `getTitle`
+- `setTitle`
+- `getDescription`
+- `setDescription`
+- `getAssignedTo`
+- `setAssignedTo`
+- `getStatus`
+- `setStatus`
+- `getDueDate`
+- `setDueDate`
+- `assignTask`
+- `setAssignmentStrategy`
+
+#### LCOM
+- Métodos que comparten atributos:
+  - `getTitle` y `setTitle` (comparten `title`)
+  - `getDescription` y `setDescription` (comparten `description`)
+  - `getAssignedTo` y `setAssignedTo` (comparten `assignedTo`)
+  - `getStatus` y `setStatus` (comparten `status`)
+  - `getDueDate` y `setDueDate` (comparten `dueDate`)
+- Métodos que no comparten atributos:
+  - `getTitle` y `getDescription`
+  - `getTitle` y `getAssignedTo`
+  - `getTitle` y `getStatus`
+  - `getTitle` y `getDueDate`
+  - `getTitle` y `assignTask`
+  - `getTitle` y `setAssignmentStrategy`
+  - (Se calculan todos los pares posibles que no comparten atributos)
+
+Total de pares posibles: \( \frac{12(12-1)}{2} = 66 \)
+
+Pares que comparten atributos: 5  
+Pares que no comparten atributos: \( 66 - 5 = 61 \)  
+
+- **LCOM = 61 - 5 = 56**
+
+#### Clase `ProjectManager`
+
+#### Atributos
+- `project`
+- `tasks`
+- `observers`
+
+#### Métodos
+- `addTask`
+- `updateTask`
+- `removeTask`
+- `addObserver`
+- `removeObserver`
+- `notifyObservers`
+
+#### LCOM
+- Métodos que comparten atributos:
+  - `addObserver` y `removeObserver` (comparten `observers`)
+  - `addTask`, `updateTask`, `removeTask` y `notifyObservers` (comparten `tasks`)
+- Métodos que no comparten atributos:
+  - `addTask` y `addObserver`
+  - `updateTask` y `addObserver`
+  - `removeTask` y `addObserver`
+  - (Se calculan todos los pares posibles que no comparten atributos)
+
+Total de pares posibles: \( \frac{6(6-1)}{2} = 15 \)
+
+Pares que comparten atributos: 2 (para `observers`) + 6 (para `tasks`) = 8  
+Pares que no comparten atributos: \( 15 - 8 = 7 \)  
+
+- **LCOM = 7 - 8 = 0** (LCOM se establece en 0 si el resultado es negativo)
+
+#### Clase `SimpleTaskAssignmentStrategy`
+
+#### Atributos
+No tiene atributos.
+
+#### Métodos
+- `assignTask`
+
+#### LCOM
+Total de pares posibles: 0 (solo un método, no hay pares para comparar)  
+- **LCOM = 0**
+
+#### Clase `PriorityTaskAssignmentStrategy`
+
+#### Atributos
+No tiene atributos.
+
+#### Métodos
+- `assignTask`
+
+#### LCOM
+Total de pares posibles: 0 (solo un método, no hay pares para comparar)  
+- **LCOM = 0**
+
+#### Clase `TaskNotificationHandler`
+
+#### Atributos
+No tiene atributos.
+
+#### Métodos
+- `update`
+
+#### LCOM
+Total de pares posibles: 0 (solo un método, no hay pares para comparar)  
+- **LCOM = 0**
+
+## Resumen de LCOM
+- **Clase `Project`: LCOM = 20**
+- **Clase `Task`: LCOM = 56**
+- **Clase `ProjectManager`: LCOM = 0**
+- **Clase `SimpleTaskAssignmentStrategy`: LCOM = 0**
+- **Clase `PriorityTaskAssignmentStrategy`: LCOM = 0**
+- **Clase `TaskNotificat
+
 ### Medir el acoplamiento utilizando el Coupling Factor (CF).
+1. Contamos los enlaces entre clases (ejemplo):
+    - Main → Project
+    - Main → ProjectManager
+    - ProjectManager → Task
+    - ProjectManager → TaskNotificationHandler
+    - Total de enlaces: 4
+2. Total de pares posibles: 5(5−1)=205(5−1)=20
+3. CF=420=0.2CF=204​=0.2
 ## Pruebas unitarias:
 ###  Implementar pruebas unitarias básicas utilizando JUnit 5 para las clases y métodos principales.
