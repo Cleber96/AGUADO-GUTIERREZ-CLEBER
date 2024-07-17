@@ -550,3 +550,156 @@ Total de pares posibles: 0 (solo un método, no hay pares para comparar)
 3. CF=420=0.2CF=204​=0.2
 ## Pruebas unitarias:
 ###  Implementar pruebas unitarias básicas utilizando JUnit 5 para las clases y métodos principales.
+#### añado mockito
+```groovy
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
+```
+- EXPLICACIÓN: Dependencias para usar mockito y junit
+##### project test
+```java
+
+public class ProjectTest {
+
+    private Project project;
+
+    @BeforeEach
+    public void setUp() {
+        project = new Project("Desarrollo de IA", "Desarrollando módulos de IA", LocalDate.now(), LocalDate.now().plusMonths(3));
+    }
+
+    @Test
+    public void testGettersAndSetters() {
+        assertEquals("Desarrollo de IA", project.getName());
+        project.setName("Nuevo Proyecto");
+        assertEquals("Nuevo Proyecto", project.getName());
+
+        assertEquals("Desarrollando módulos de IA", project.getDescription());
+        project.setDescription("Nueva Descripción");
+        assertEquals("Nueva Descripción", project.getDescription());
+
+        assertEquals(LocalDate.now(), project.getStartDate());
+        project.setStartDate(LocalDate.now().minusDays(1));
+        assertEquals(LocalDate.now().minusDays(1), project.getStartDate());
+
+        assertEquals(LocalDate.now().plusMonths(3), project.getEndDate());
+        project.setEndDate(LocalDate.now().plusMonths(4));
+        assertEquals(LocalDate.now().plusMonths(4), project.getEndDate());
+    }
+}
+```
+![test_projectManager](Image/test_projectManager.png)
+- EXPLICACIÓN:
+    - Nombre del proyecto: Verifica que el getter (getName) devuelve el valor inicial "Desarrollo de IA" y luego comprueba que el setter (setName) actualiza el nombre correctamente a "Nuevo Proyecto".
+    - Descripción del proyecto: Verifica que el getter (getDescription) devuelve el valor inicial "Desarrollando módulos de IA" y luego comprueba que el setter (setDescription) actualiza la descripción correctamente a "Nueva Descripción".
+    - Fecha de inicio: Verifica que el getter (getStartDate) devuelve la fecha inicial (fecha actual) y luego comprueba que el setter (setStartDate) actualiza la fecha de inicio correctamente.
+    - Fecha de fin: Verifica que el getter (getEndDate) devuelve la fecha inicial (tres meses después de la fecha actual) y luego comprueba que el setter (setEndDate) actualiza la fecha de fin correctamente.
+##### ProjectManager test
+```java
+public class ProjectManagerTest {
+
+    private Project project;
+    private ProjectManager projectManager;
+    private Task task;
+    private Observer observer;
+
+    @BeforeEach
+    public void setUp() {
+        project = new Project("Desarrollo de IA", "Desarrollando módulos de IA", LocalDate.now(), LocalDate.now().plusMonths(3));
+        projectManager = new ProjectManager(project);
+        task = new Task("Diseñar IA", "Diseñar la arquitectura de IA", "Jane Doe", "Pendiente", LocalDate.now().plusDays(10));
+        observer = mock(Observer.class);
+        projectManager.addObserver(observer);
+    }
+
+    @Test
+    public void testAddTask() {
+        projectManager.addTask(task);
+        verify(observer, times(1)).update("added", task);
+    }
+
+    @Test
+    public void testUpdateTask() {
+        projectManager.addTask(task); // Primero añadimos la tarea
+        projectManager.updateTask(task);
+        verify(observer, times(1)).update("updated", task);
+    }
+
+    @Test
+    public void testRemoveTask() {
+        projectManager.addTask(task); // Primero añadimos la tarea
+        projectManager.removeTask(task);
+        verify(observer, times(1)).update("removed", task);
+    }
+
+    @Test
+    public void testAddObserver() {
+        assertTrue(projectManager.getObservers().contains(observer));
+    }
+
+    @Test
+    public void testRemoveObserver() {
+        projectManager.removeObserver(observer);
+        assertFalse(projectManager.getObservers().contains(observer));
+    }
+}
+```
+![test_project](Image/test_project.png)
+- EXPLICACIÓN: 
+    -  `testAddTask` , `testUpdateTask`, `testRemoveTask`se tutiliza Mockito para verificar que el método update del observer simulado fue llamado una vez con los parámetros "added, updated, removed" y task.
+    - testAddObserver Verifica que el observer simulado esté presente en la lista de observadores del projectManager.
+    - testRemoveObserver  Verifica que el observer simulado ya no esté presente en la lista de observadores del projectManager.
+##### task test
+```java
+public class TaskTest {
+
+    private Task task;
+
+    @BeforeEach
+    public void setUp() {
+        task = new Task("Diseñar IA", "Diseñar la arquitectura de IA", "Jane Doe", "Pendiente", LocalDate.now().plusDays(10));
+    }
+
+    @Test
+    public void testGettersAndSetters() {
+        assertEquals("Diseñar IA", task.getTitle());
+        task.setTitle("Nuevo Título");
+        assertEquals("Nuevo Título", task.getTitle());
+
+        assertEquals("Diseñar la arquitectura de IA", task.getDescription());
+        task.setDescription("Nueva Descripción");
+        assertEquals("Nueva Descripción", task.getDescription());
+
+        assertEquals("Jane Doe", task.getAssignedTo());
+        task.setAssignedTo("John Doe");
+        assertEquals("John Doe", task.getAssignedTo());
+
+        assertEquals("Pendiente", task.getStatus());
+        task.setStatus("Completado");
+        assertEquals("Completado", task.getStatus());
+
+        assertEquals(LocalDate.now().plusDays(10), task.getDueDate());
+        task.setDueDate(LocalDate.now().plusDays(5));
+        assertEquals(LocalDate.now().plusDays(5), task.getDueDate());
+    }
+
+    @Test
+    public void testAssignTask() {
+        task.setAssignmentStrategy(new SimpleTaskAssignmentStrategy());
+        task.assignTask();
+        assertEquals("Asignado automáticamente", task.getAssignedTo());
+    }
+
+    @Test
+    public void testAssignTaskWithNoStrategy() {
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, task::assignTask);
+        assertEquals("No se ha especificado una estrategia de asignación", thrown.getMessage());
+    }
+}
+
+```
+- EXPLICACIÓN:
+    - `testAssignTask` Comprueba que el atributo assignedTo de la tarea se actualiza correctamente a "Asignado automáticamente" según la lógica de la estrategia de asignación.
+    - `testAssignTaskWithNoStrategy` Comprueba que el mensaje de la excepción sea "No se ha especificado una estrategia de asignación".
