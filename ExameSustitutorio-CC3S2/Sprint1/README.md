@@ -700,6 +700,7 @@ public class TaskTest {
 }
 
 ```
+![test_task](Image/test_task.png)
 - EXPLICACIÓN:
     - `testAssignTask` Comprueba que el atributo assignedTo de la tarea se actualiza correctamente a "Asignado automáticamente" según la lógica de la estrategia de asignación.
     - `testAssignTaskWithNoStrategy` Comprueba que el mensaje de la excepción sea "No se ha especificado una estrategia de asignación".

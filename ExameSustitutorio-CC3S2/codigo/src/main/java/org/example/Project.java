@@ -7,7 +7,13 @@ public class Project {
     private String description;
     private LocalDate startDate;
     private LocalDate endDate;
-
+    /**
+     * Constructor para inicializar un proyecto con nombre, descripción, fecha de inicio y fecha de finalización.
+     * @param name Nombre del proyecto.
+     * @param description Descripción del proyecto.
+     * @param startDate Fecha de inicio del proyecto.
+     * @param endDate Fecha de finalización del proyecto.
+     */
     public Project(String name, String description, LocalDate startDate, LocalDate endDate) {
         this.name = name;
         this.description = description;
